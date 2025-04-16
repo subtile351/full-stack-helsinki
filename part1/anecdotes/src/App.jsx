@@ -25,12 +25,21 @@ const App = () => {
     setVotes(votesCopy)
   }
 
+  const mostVotes = votes.indexOf(Math.max(...votes))
+
   return (
     <>
+      <h1>Anecdote of the day</h1>
       {anecdotes[selected]}
       <br></br>
       <button onClick={vote}>vote</button>
       <button onClick={selectRandom}>next anecdote</button>
+      <h1>Anecdote with most votes</h1>
+      {votes.every(vote => vote === 0) ? (
+        <p>Vote for your favorite anecdote</p>
+      ) : (
+        <p>{anecdotes[mostVotes]}</p>
+      )}
     </>
   )
 }
