@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import Filter from './components/Filter'
+import Form from './components/Form'
+import Person from './components/Person'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -10,6 +13,12 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterContent, setFilterContent] = useState('')
+
+  const personsToShow = filterContent === '' 
+    ? persons 
+    : persons.filter(person => 
+        person.name.toLowerCase().startsWith(filterContent.toLowerCase())
+      )
 
   const addName = (event) => {
     event.preventDefault()
@@ -42,47 +51,23 @@ const App = () => {
   const handleNumberChange = (event) => {
     setNewNumber(event.target.value)
   }
-  
-  const handleFilterChange = (event) => {
-    setFilterContent(event.target.value)
-  }
-
-  const personsToShow = filterContent === '' 
-    ? persons 
-    : persons.filter(person => 
-        person.name.toLowerCase().startsWith(filterContent.toLowerCase())
-      )
 
   return (
   <>
     <h2>Phonebook</h2>
-    <p>filter shown with</p>
-    <input
-      value={filterContent}
-      onChange={handleFilterChange}
-    />
+    <Filter content={filterContent} setContent={setFilterContent}/>
     <h2>Add a new</h2>
-    <form onSubmit={addName}>
-      <div>
-        name: <input 
-          value={newName}
-          onChange={handleNameChange}
-        />
-      <div>
-        phone number: <input
-          value={newNumber}
-          onChange={handleNumberChange}
-        />
-      </div>
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
+    <Form
+      addName={addName}
+      newName={newName}
+      handleNameChange={handleNameChange}
+      newNumber={newNumber}
+      handleNumberChange={handleNumberChange}
+    />
     <h2>Numbers</h2>
     <ul>
       {personsToShow.map(person => (
-        <li key={person.name}>{person.name} {person.number}</li>
+        <Person key={person.name} person={person} />
       ))}
     </ul>
   </>
