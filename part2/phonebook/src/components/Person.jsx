@@ -1,9 +1,9 @@
 const Person = props => {
     return (
-        <>
-            <li>{props.person.name} {props.person.number}</li>
-            <button onClick={props.onClick}>delete</button>
-        </>
+        <li>
+            <span>{props.person.name} {props.person.number}</span>
+            <button onClick={props.onClick}>Delete contact</button>
+        </li>
     )
 }
 

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import Filter from './components/Filter'
 import Form from './components/Form'
 import Person from './components/Person'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterContent, setFilterContent] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     personService
@@ -39,9 +40,17 @@ const App = () => {
     if (isDuplicate) {
       if (window.confirm(`${personObject.name} is already in the phonebook. Replace the old number with a new one?`)) {
         const id = persons.find(person => person.name.toLowerCase() === personObject.name.toLowerCase()).id
+
         personService
           .update(id, personObject)
           .then(response => setPersons(persons.map(person => person.id === id ? response.data : person)))
+
+        setErrorMessage(
+          `${personObject.name}'s number was updated`
+        )
+        setTimeout(() => {
+          setErrorMessage('')
+        }, 5000)     
 
       }
     } else {
@@ -50,6 +59,13 @@ const App = () => {
         .then(response => {
           setPersons(persons.concat(response.data))
         })
+      
+      setErrorMessage(
+        `${personObject.name} was added to the phonebook`
+      )
+      setTimeout(() => {
+        setErrorMessage('')
+      }, 5000)   
     }
 
     setNewName('')
@@ -68,12 +84,19 @@ const App = () => {
     if (window.confirm(`Are you sure you want to remove ${personToDelete.name} from the phonebook?`)) {
       personService.remove(personToDelete.id)
       setPersons(persons.filter(person => person.id !== personToDelete.id))
+      setErrorMessage(
+        `${personToDelete.name} was removed from the phonebook`
+      )
+      setTimeout(() => {
+        setErrorMessage('')
+      }, 5000)
     }
   }
 
   return (
   <>
     <h2>Phonebook</h2>
+    <Notification message={errorMessage} />
     <Filter content={filterContent} setContent={setFilterContent}/>
     <h2>Add a new</h2>
     <Form
