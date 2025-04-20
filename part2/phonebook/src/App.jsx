@@ -11,6 +11,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filterContent, setFilterContent] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [notificationType, setNotificationType] = useState('')
 
   useEffect(() => {
     personService
@@ -44,7 +45,17 @@ const App = () => {
         personService
           .update(id, personObject)
           .then(response => setPersons(persons.map(person => person.id === id ? response.data : person)))
+          .catch(error => {
+            setNotificationType('error')
+            setErrorMessage(
+              `${personObject.name} does not exist in the phonebook`
+            )
+            setTimeout(() => {
+              setErrorMessage('')
+            }, 5000)  
+          })
 
+        setNotificationType('success')
         setErrorMessage(
           `${personObject.name}'s number was updated`
         )
@@ -60,6 +71,7 @@ const App = () => {
           setPersons(persons.concat(response.data))
         })
       
+      setNotificationType('success')
       setErrorMessage(
         `${personObject.name} was added to the phonebook`
       )
@@ -84,6 +96,8 @@ const App = () => {
     if (window.confirm(`Are you sure you want to remove ${personToDelete.name} from the phonebook?`)) {
       personService.remove(personToDelete.id)
       setPersons(persons.filter(person => person.id !== personToDelete.id))
+
+      setNotificationType('success')
       setErrorMessage(
         `${personToDelete.name} was removed from the phonebook`
       )
@@ -96,7 +110,7 @@ const App = () => {
   return (
   <>
     <h2>Phonebook</h2>
-    <Notification message={errorMessage} />
+    <Notification message={errorMessage} type={notificationType} />
     <Filter content={filterContent} setContent={setFilterContent}/>
     <h2>Add a new</h2>
     <Form
