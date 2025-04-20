@@ -28,16 +28,22 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault()
     const personObject = {
-      name: newName,
-      number: newNumber
+      name: newName.trim(),
+      number: newNumber.trim()
     }
 
     let isDuplicate = false
 
-    persons.forEach((person) => person.name === personObject.name ? isDuplicate = true : isDuplicate = isDuplicate)
+    persons.forEach((person) => person.name.toLowerCase() === personObject.name.toLowerCase() ? isDuplicate = true : isDuplicate = isDuplicate)
 
     if (isDuplicate) {
-      alert(`${personObject.name} is already added to the phonebook`)
+      if (window.confirm(`${personObject.name} is already in the phonebook. Replace the old number with a new one?`)) {
+        const id = persons.find(person => person.name.toLowerCase() === personObject.name.toLowerCase()).id
+        personService
+          .update(id, personObject)
+          .then(response => setPersons(persons.map(person => person.id === id ? response.data : person)))
+
+      }
     } else {
       personService
         .create(personObject)
