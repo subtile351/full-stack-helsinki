@@ -58,6 +58,13 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
+  const handleDeletion = id => {
+    if (window.confirm(`Are you sure you want to delete the person from the phonebook?`)) {
+      personService.remove(id)
+      setPersons(persons.filter(person => person.id !== id))
+    }
+  }
+
   return (
   <>
     <h2>Phonebook</h2>
@@ -73,7 +80,7 @@ const App = () => {
     <h2>Numbers</h2>
     <ul>
       {personsToShow.map(person => (
-        <Person key={person.name} person={person} />
+        <Person key={person.id} person={person} onClick={() => handleDeletion(person.id)} />
       ))}
     </ul>
   </>
