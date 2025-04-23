@@ -21,11 +21,13 @@ const App = () => {
       })
   }, [])
 
-  const personsToShow = filterContent === '' 
-    ? persons 
-    : persons.filter(person => 
-        person.name.toLowerCase().startsWith(filterContent.toLowerCase())
-      )
+  const personsToShow = Array.isArray(persons) 
+    ? (filterContent === '' 
+        ? persons 
+        : persons.filter(person => 
+            person.name.toLowerCase().startsWith(filterContent.toLowerCase())
+          ))
+    : []
 
   const addName = (event) => {
     event.preventDefault()
