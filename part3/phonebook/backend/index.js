@@ -41,10 +41,6 @@ app.get('/api/persons/:id', (request, response) => {
     })
 })
 
-const generateId = () => {
-    return Math.floor(Math.random()*9999999)
-}
-
 app.post('/api/persons', (request, response) => {
     const body = request.body
 
@@ -54,22 +50,14 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    if (persons.some(person => person.name === body.name)) {
-        return response.status(400).json({
-            error: 'Name already exists'
-        })
-    }
-
-    const person = {
+    const person = new Person({
         name: body.name,
-        number: body.number,
-        id: generateId(),
-    }
+        number: body.number
+    })
 
-    persons = persons.concat(person)
-
-
-    response.json(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 app.delete('/api/persons/:id', (request, resposne) => {
