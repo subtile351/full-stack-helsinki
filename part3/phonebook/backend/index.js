@@ -1,41 +1,38 @@
+// Load environment variables from a .env file into process.env
+require('dotenv').config()
+
+// Importing the Express framework
 const express = require('express')
+
+// Importing Morgan for logging HTTP requests
 const morgan = require('morgan')
+
+// Importing the Person model from the models directory
+const Person = require('./models/person')
+
+// Initializing the Express application
 const app = express()
 
+// Middleware to parse incoming JSON requests
 app.use(express.json())
+
+// Middleware to serve static files from the 'dist' directory and to load the production build of the frontend
 app.use(express.static('dist'))
 
+// Define a custom token for Morgan to log the content of POST requests
 morgan.token('postContent', function (req, res) {
+    // If the HTTP method is POST, return the stringified body of the request
     return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
 
+// Use Morgan middleware to log HTTP requests in a specific format
+// Includes method, URL, status, response length, response time, and POST request content (if applicable)
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postContent'))
 
-persons = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -91,7 +88,7 @@ app.get('/info', (request, response) => {
     response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, ()=> {
     console.log(`Server running on port ${PORT}`)
 })
