@@ -3,7 +3,13 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(express.static('dist'))
+
+morgan.token('postContent', function (req, res) {
+    return req.method === 'POST' ? JSON.stringify(req.body) : ''
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postContent'))
 
 persons = [
     { 
@@ -70,7 +76,7 @@ app.post('/api/persons', (request, response) => {
 
     persons = persons.concat(person)
 
-    console.log(person)
+
     response.json(person)
 })
 
@@ -85,7 +91,7 @@ app.get('/info', (request, response) => {
     response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, ()=> {
     console.log(`Server running on port ${PORT}`)
 })
