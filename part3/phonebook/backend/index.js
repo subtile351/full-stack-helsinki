@@ -60,6 +60,26 @@ app.post('/api/persons', (request, response) => {
     })
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    Person.findOneAndUpdate(
+        { name: { $regex: new RegExp(`^${body.name}$`, 'i') } },
+        { number: body.number },
+        { new: true } // Return the updated document
+    )
+        .then(updatedPerson => {
+            if (updatedPerson) {
+                response.json(updatedPerson)
+            } else {
+                response.status(404).json({ error: 'Name not found in the database' })
+            }
+        })
+        .catch(error => {
+            next(error)
+        })
+})
+
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id)
         .then(result => {
