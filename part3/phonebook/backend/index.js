@@ -60,16 +60,29 @@ app.post('/api/persons', (request, response) => {
     })
 })
 
-app.delete('/api/persons/:id', (request, resposne) => {
-    const id = request.params.id
-    persons = persons.filter(person => person.id != id)
-
-    resposne.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndDelete(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => {
+            next(error)
+        })
 })
 
 app.get('/info', (request, response) => {
     response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
+
+const errorHandler = (error, request, response, next) => {
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'incorrect id' })
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, ()=> {
