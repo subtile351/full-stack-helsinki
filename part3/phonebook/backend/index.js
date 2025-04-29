@@ -44,14 +44,6 @@ app.get('/api/persons/:id', (request, response) => {
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    /*
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'Name or number missing'
-        })
-    }
-    */
-
     const person = new Person({
         name: body.name,
         number: body.number
@@ -70,7 +62,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     Person.findOneAndUpdate(
         { name: { $regex: new RegExp(`^${body.name}$`, 'i') } },
         { number: body.number },
-        { new: true } // Return the updated document
+        { new: true, runValidators: true } // Return the new document and force validation on update
     )
         .then(updatedPerson => {
             if (updatedPerson) {
@@ -100,7 +92,7 @@ app.get('/info', (request, response) => {
 
 const errorHandler = (error, request, response, next) => {
     if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'incorrect id' })
+        return response.status(400).json({ error: 'incorrect id' })
     } else if (error.name === 'ValidationError') {
         return response.status(400).json({ error: error.message })
     }
