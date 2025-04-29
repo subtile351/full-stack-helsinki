@@ -49,9 +49,7 @@ const App = () => {
           .then(response => setPersons(persons.map(person => person.id === id ? response.data : person)))
           .catch(error => {
             setNotificationType('error')
-            setErrorMessage(
-              `${personObject.name} does not exist in the phonebook`
-            )
+            setErrorMessage(error.response.data.error)
             setTimeout(() => {
               setErrorMessage('')
             }, 5000)  
@@ -71,6 +69,13 @@ const App = () => {
         .create(personObject)
         .then(response => {
           setPersons(persons.concat(response.data))
+        })
+        .catch(error => {
+          setNotificationType('error')
+          setErrorMessage(error.response.data.error)
+          setTimeout(() => {
+            setErrorMessage('')
+          }, 5000)
         })
       
       setNotificationType('success')
