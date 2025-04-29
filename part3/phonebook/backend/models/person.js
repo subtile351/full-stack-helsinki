@@ -18,8 +18,15 @@ mongoose.connect(url)
 
 // Define the schema for a "Person" document in the database
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String,
+    name: {
+        type: String,
+        minLength: 3,
+        required: true
+    },
+    number: {
+        type: String,
+        required: true
+    },
 })
 
 // Transform the way how documents are returned from MongoDB
