@@ -38,7 +38,11 @@ const App = () => {
 
     let isDuplicate = false
 
-    persons.forEach((person) => person.name.toLowerCase() === personObject.name.toLowerCase() ? isDuplicate = true : isDuplicate = isDuplicate)
+    persons.forEach((person) => {
+      if (person.name.toLowerCase() === personObject.name.toLowerCase()) {
+        isDuplicate = true
+      }
+    })
 
     if (isDuplicate) {
       if (window.confirm(`${personObject.name} is already in the phonebook. Replace the old number with a new one?`)) {
