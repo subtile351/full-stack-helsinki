@@ -2,8 +2,8 @@ const { test, describe } = require('node:test')
 const assert = require('node:assert')
 const listHelper = require('../utils/list_helper')
 
-describe('author with most blogs', () => {
-  const listWithOneBlog = [
+describe('author with most likes', () => {
+    const listWithOneBlog = [
     {
       _id: '5a422aa71b54a676234d17f8',
       title: 'Go To Statement Considered Harmful',
@@ -66,17 +66,17 @@ describe('author with most blogs', () => {
   ]
 
   test('in an empty list is null', () => {
-    const result = listHelper.mostBlogs([])
+    const result = listHelper.mostLikes([])
     assert.strictEqual(result, null)
   })
 
   test('in a single item list is the item\'s author', () => {
-    const result = listHelper.mostBlogs(listWithOneBlog)
-    assert.deepStrictEqual(result, {author: 'Edsger W. Dijkstra', blogs: 1})
+    const result = listHelper.mostLikes(listWithOneBlog)
+    assert.deepStrictEqual(result, {author: 'Edsger W. Dijkstra', likes: 5})
   })
 
   test('in a many item list is the correct author', () => {
-    const result = listHelper.mostBlogs(listWithManyBlogs)
-    assert.deepStrictEqual(result, {author: 'Robert C. Martin', blogs: 3})
+    const result = listHelper.mostLikes(listWithManyBlogs)
+    assert.deepStrictEqual(result, {author: 'Edsger W. Dijkstra', likes: 27})
   })
 })
