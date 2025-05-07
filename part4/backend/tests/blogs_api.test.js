@@ -29,6 +29,13 @@ const initialBlogs = [
   }
 ]
 
+const newBlog = {
+  title: 'Understanding JavaScript Closures',
+  author: 'Kyle Simpson',
+  url: 'https://github.com/getify/You-Dont-Know-JS',
+  likes: 10
+}
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let blogObject = new Blog(initialBlogs[0])
@@ -58,6 +65,19 @@ test('unique id of a specific blog is named correctly', async () => {
 
   assert.ok(specificBlog.id, 'specific blog has id property')
   assert.strictEqual(blog._id, undefined, '_id property does not exist')
+})
+
+test('new blgos are created correctly', async () => {
+  const response = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  assert.strictEqual(response.body.title, newBlog.title, 'title created correclty')
+  assert.strictEqual(response.body.author, newBlog.author, 'author created correclty')
+  assert.strictEqual(response.body.url, newBlog.url, 'url created correclty')
+  assert.strictEqual(response.body.likes, newBlog.likes, 'likes created correclty')
 })
 
 after(async () => {
