@@ -1,0 +1,6 @@
+# make all JS files normalized to LF on checkout/commit
+*.js text eol=lf
+
+# (optional) do the same for JSON, shell scripts, etc.
+*.json text eol=lf
+*.sh  text eol=lf
