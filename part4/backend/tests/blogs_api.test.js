@@ -4,6 +4,7 @@ const supertest = require('supertest')
 const assert = require('node:assert')
 const app = require('../app')
 const Blog = require('../models/blog')
+const blog = require('../models/blog')
 
 const api = supertest(app)
 
@@ -49,6 +50,14 @@ test('all notes are returned', async () => {
   const response = await api.get('/api/blogs')
 
   assert.strictEqual(response.body.length, initialBlogs.length)
+})
+
+test('unique id of a specific blog is named correctly', async () => {
+  const response = await api.get('/api/blogs')
+  const specificBlog = response.body[0]
+
+  assert.ok(specificBlog.id, 'specific blog has id property')
+  assert.strictEqual(blog._id, undefined, '_id property does not exist')
 })
 
 after(async () => {
