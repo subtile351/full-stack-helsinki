@@ -68,16 +68,19 @@ test('unique id of a specific blog is named correctly', async () => {
 })
 
 test('new blgos are created correctly', async () => {
-  const response = await api
+  const postResponse = await api
     .post('/api/blogs')
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  assert.strictEqual(response.body.title, newBlog.title, 'title created correclty')
-  assert.strictEqual(response.body.author, newBlog.author, 'author created correclty')
-  assert.strictEqual(response.body.url, newBlog.url, 'url created correclty')
-  assert.strictEqual(response.body.likes, newBlog.likes, 'likes created correclty')
+  assert.strictEqual(postResponse.body.title, newBlog.title, 'title saved correclty')
+  assert.strictEqual(postResponse.body.author, newBlog.author, 'author saved correclty')
+  assert.strictEqual(postResponse.body.url, newBlog.url, 'url saved correclty')
+  assert.strictEqual(postResponse.body.likes, newBlog.likes, 'likes saved correclty')
+
+  const getResponse = await api.get('/api/blogs')
+  assert.strictEqual(getResponse.body.length, initialBlogs.length + 1, 'new blog increases the size of the collection by one')
 })
 
 after(async () => {
