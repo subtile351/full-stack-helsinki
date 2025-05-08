@@ -42,6 +42,18 @@ const newBlogNoLikes = {
   url: 'https://github.com/getify/You-Dont-Know-JS'
 }
 
+const newBlogNoTitle = {
+  author: 'Kyle Simpson',
+  url: 'https://github.com/getify/You-Dont-Know-JS',
+  likes: 10
+}
+
+const newBlogNoUrl = {
+  title: 'Understanding JavaScript Closures',
+  author: 'Kyle Simpson',
+  likes: 10
+}
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let blogObject = new Blog(initialBlogs[0])
@@ -97,6 +109,20 @@ test('new blog without likes is created correctly', async () => {
     .expect('Content-Type', /application\/json/)
 
   assert.strictEqual(response.body.likes, 0, 'blogs without likes automatically defaults to zero likes')
+})
+
+test('new blog without title is handled correctly', async () => {
+  await api
+    .post('/api/blogs')
+    .send(newBlogNoTitle)
+    .expect(400)
+})
+
+test('new blog without url is handled correctly', async () => {
+  await api
+    .post('/api/blogs')
+    .send(newBlogNoUrl)
+    .expect(400)
 })
 
 after(async () => {
