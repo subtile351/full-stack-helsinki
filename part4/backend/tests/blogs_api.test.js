@@ -26,6 +26,12 @@ const initialBlogs = [
     author: 'Edsger W. Dijkstra',
     url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
     likes: 3
+  },
+  {
+    title: 'blog to be deleted',
+    author: 'Me',
+    url: 'http://delete.me',
+    likes: 0
   }
 ]
 
@@ -93,6 +99,11 @@ describe('when existing blgos are requested', () => {
 })
 
 describe('when new blogs are created', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(initialBlogs)
+  })
+
   test('new complete blog is created correctly', async () => {
     const postResponse = await api
       .post('/api/blogs')
@@ -132,6 +143,23 @@ describe('when new blogs are created', () => {
       .send(newBlogNoUrl)
       .expect(400)
   })
+})
+
+describe('when blog is being deleted', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(initialBlogs)
+  })
+
+  test('deletion of an existing blog is handled correctly', async () => {
+    const blog = await Blog.findOne({ title: /blog to be deleted/i }).lean()
+    const id = blog._id.toString()
+
+    const response = await api
+      .delete(`/api/blogs/${id}`)
+      .expect(204)
+  })
+
 })
 
 after(async () => {
