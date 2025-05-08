@@ -29,11 +29,17 @@ const initialBlogs = [
   }
 ]
 
-const newBlog = {
+const newCompleteBlog = {
   title: 'Understanding JavaScript Closures',
   author: 'Kyle Simpson',
   url: 'https://github.com/getify/You-Dont-Know-JS',
   likes: 10
+}
+
+const newBlogNoLikes = {
+  title: 'Understanding JavaScript Closures',
+  author: 'Kyle Simpson',
+  url: 'https://github.com/getify/You-Dont-Know-JS'
 }
 
 beforeEach(async () => {
@@ -67,20 +73,30 @@ test('unique id of a specific blog is named correctly', async () => {
   assert.strictEqual(blog._id, undefined, '_id property does not exist')
 })
 
-test('new blgos are created correctly', async () => {
+test('new complete blog is created correctly', async () => {
   const postResponse = await api
     .post('/api/blogs')
-    .send(newBlog)
+    .send(newCompleteBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  assert.strictEqual(postResponse.body.title, newBlog.title, 'title saved correclty')
-  assert.strictEqual(postResponse.body.author, newBlog.author, 'author saved correclty')
-  assert.strictEqual(postResponse.body.url, newBlog.url, 'url saved correclty')
-  assert.strictEqual(postResponse.body.likes, newBlog.likes, 'likes saved correclty')
+  assert.strictEqual(postResponse.body.title, newCompleteBlog.title, 'title saved correclty')
+  assert.strictEqual(postResponse.body.author, newCompleteBlog.author, 'author saved correclty')
+  assert.strictEqual(postResponse.body.url, newCompleteBlog.url, 'url saved correclty')
+  assert.strictEqual(postResponse.body.likes, newCompleteBlog.likes, 'likes saved correclty')
 
   const getResponse = await api.get('/api/blogs')
   assert.strictEqual(getResponse.body.length, initialBlogs.length + 1, 'new blog increases the size of the collection by one')
+})
+
+test('new blog without likes is created correctly', async () => {
+  const response = await api
+    .post('/api/blogs')
+    .send(newBlogNoLikes)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  assert.strictEqual(response.body.likes, 0, 'blogs without likes automatically defaults to zero likes')
 })
 
 after(async () => {
