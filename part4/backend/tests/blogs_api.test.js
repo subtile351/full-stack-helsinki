@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const assert = require('node:assert')
@@ -64,65 +64,74 @@ beforeEach(async () => {
   await blogObject.save()
 })
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+describe('when existing blgos are requested', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(initialBlogs)
+  })
+
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('all notes are returned', async () => {
+    const response = await api.get('/api/blogs')
+
+    assert.strictEqual(response.body.length, initialBlogs.length)
+  })
+
+  test('unique id of a specific blog is named correctly', async () => {
+    const response = await api.get('/api/blogs')
+    const specificBlog = response.body[0]
+
+    assert.ok(specificBlog.id, 'specific blog has id property')
+    assert.strictEqual(blog._id, undefined, '_id property does not exist')
+  })
 })
 
-test('all notes are returned', async () => {
-  const response = await api.get('/api/blogs')
+describe('when new blogs are created', () => {
+  test('new complete blog is created correctly', async () => {
+    const postResponse = await api
+      .post('/api/blogs')
+      .send(newCompleteBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-  assert.strictEqual(response.body.length, initialBlogs.length)
-})
+    assert.strictEqual(postResponse.body.title, newCompleteBlog.title, 'title saved correclty')
+    assert.strictEqual(postResponse.body.author, newCompleteBlog.author, 'author saved correclty')
+    assert.strictEqual(postResponse.body.url, newCompleteBlog.url, 'url saved correclty')
+    assert.strictEqual(postResponse.body.likes, newCompleteBlog.likes, 'likes saved correclty')
 
-test('unique id of a specific blog is named correctly', async () => {
-  const response = await api.get('/api/blogs')
-  const specificBlog = response.body[0]
+    const getResponse = await api.get('/api/blogs')
+    assert.strictEqual(getResponse.body.length, initialBlogs.length + 1, 'new blog increases the size of the collection by one')
+  })
 
-  assert.ok(specificBlog.id, 'specific blog has id property')
-  assert.strictEqual(blog._id, undefined, '_id property does not exist')
-})
+  test('new blog without likes is created correctly', async () => {
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlogNoLikes)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-test('new complete blog is created correctly', async () => {
-  const postResponse = await api
-    .post('/api/blogs')
-    .send(newCompleteBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    assert.strictEqual(response.body.likes, 0, 'blogs without likes automatically defaults to zero likes')
+  })
 
-  assert.strictEqual(postResponse.body.title, newCompleteBlog.title, 'title saved correclty')
-  assert.strictEqual(postResponse.body.author, newCompleteBlog.author, 'author saved correclty')
-  assert.strictEqual(postResponse.body.url, newCompleteBlog.url, 'url saved correclty')
-  assert.strictEqual(postResponse.body.likes, newCompleteBlog.likes, 'likes saved correclty')
+  test('new blog without title is handled correctly', async () => {
+    await api
+      .post('/api/blogs')
+      .send(newBlogNoTitle)
+      .expect(400)
+  })
 
-  const getResponse = await api.get('/api/blogs')
-  assert.strictEqual(getResponse.body.length, initialBlogs.length + 1, 'new blog increases the size of the collection by one')
-})
-
-test('new blog without likes is created correctly', async () => {
-  const response = await api
-    .post('/api/blogs')
-    .send(newBlogNoLikes)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
-  assert.strictEqual(response.body.likes, 0, 'blogs without likes automatically defaults to zero likes')
-})
-
-test('new blog without title is handled correctly', async () => {
-  await api
-    .post('/api/blogs')
-    .send(newBlogNoTitle)
-    .expect(400)
-})
-
-test('new blog without url is handled correctly', async () => {
-  await api
-    .post('/api/blogs')
-    .send(newBlogNoUrl)
-    .expect(400)
+  test('new blog without url is handled correctly', async () => {
+    await api
+      .post('/api/blogs')
+      .send(newBlogNoUrl)
+      .expect(400)
+  })
 })
 
 after(async () => {
