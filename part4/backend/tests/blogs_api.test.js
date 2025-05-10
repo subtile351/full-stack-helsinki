@@ -60,6 +60,10 @@ const newBlogNoUrl = {
   likes: 10
 }
 
+const newBlogOnlyLikes = {
+  likes: 9999
+}
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let blogObject = new Blog(initialBlogs[0])
@@ -145,6 +149,26 @@ describe('when new blogs are created', () => {
   })
 })
 
+describe('when blog is being updated', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(initialBlogs)
+  })
+
+  test('new likes value for a blog set correctly', async () => {
+    const blog = await Blog.findOne({})
+    const id = blog._id.toString()
+
+    const result = await api
+      .put(`/api/blogs/${id}`)
+      .send(newBlogOnlyLikes)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(result.body.likes, newBlogOnlyLikes.likes)
+  })
+})
+
 describe('when blog is being deleted', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
@@ -155,7 +179,7 @@ describe('when blog is being deleted', () => {
     const blog = await Blog.findOne({ title: /blog to be deleted/i }).lean()
     const id = blog._id.toString()
 
-    const response = await api
+    await api
       .delete(`/api/blogs/${id}`)
       .expect(204)
   })
