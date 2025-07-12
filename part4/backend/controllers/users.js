@@ -6,11 +6,11 @@ usersRouter.post('/', async (request, response) => {
   const { username, name, password } = request.body
 
   if (!username || username.length < 3) {
-    return response.status(400).json({ error: 'username is invalid' })
+    return response.status(400).json({ error: 'username is invalid' }).end()
   }
 
   if (!password || password.length < 3) {
-    return response.status(400).json({ error: 'password is invalid' })
+    return response.status(400).json({ error: 'password is invalid' }).end()
   }
 
   const saltRounds = 10

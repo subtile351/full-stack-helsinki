@@ -41,10 +41,11 @@ describe('when there is initially one user in db', () => {
     assert(usernames.includes(newUser.username))
   })
 
-  test('creation fails when username is missing', async () => {
+  test('creation fails with a duplicate username', async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
+      username: usersAtStart[0].username,
       name: 'nikolai',
       password: 'password'
     }
@@ -53,6 +54,26 @@ describe('when there is initially one user in db', () => {
       .post('/api/users')
       .send(newUser)
       .expect(400)
+      .expect('Content-Type', /application\/json/)
+  })
+})
+
+describe('when user provides invalid credentials', () => {
+  test('creation fails when username is missing', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      name: 'nikolai',
+      password: 'password'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('username is invalid'))
 
     const usersAtEnd = await helper.usersInDb()
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -67,10 +88,13 @@ describe('when there is initially one user in db', () => {
       password: 'password'
     }
 
-    await api
+    const result = await api
       .post('/api/users')
       .send(newUser)
       .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('username is invalid'))
 
     const usersAtEnd = await helper.usersInDb()
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -84,10 +108,13 @@ describe('when there is initially one user in db', () => {
       name: 'nikolai',
     }
 
-    await api
+    const result = await api
       .post('/api/users')
       .send(newUser)
       .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('password is invalid'))
 
     const usersAtEnd = await helper.usersInDb()
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
@@ -97,15 +124,18 @@ describe('when there is initially one user in db', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
-      username: 'te',
+      username: 'username',
       name: 'nikolai',
       password: 'pa'
     }
 
-    await api
+    const result = await api
       .post('/api/users')
       .send(newUser)
       .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    assert(result.body.error.includes('password is invalid'))
 
     const usersAtEnd = await helper.usersInDb()
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
