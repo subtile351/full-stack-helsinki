@@ -2,24 +2,17 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const { userExtractor } = require('../utils/middleware')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('creator', { username: 1, name: 1 })
   response.json(blogs)
 })
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', userExtractor, async (request, response) => {
   const blog = new Blog(request.body)
 
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-  const creator = await User.findById(decodedToken.id)
-
-  if (!creator) {
-    return response.status(400).json({ error: 'user not found' })
-  }
+  const creatorId = response.userId
 
   if (!blog.likes) {
     blog.likes = 0
@@ -29,9 +22,11 @@ blogsRouter.post('/', async (request, response) => {
     response.status(400).end()
   }
 
-  blog.creator = creator._id
+  blog.creator = creatorId
 
   const result = await blog.save()
+
+  const creator = await User.findById(creatorId)
 
   creator.blogs = creator.blogs.concat(result._id)
   await creator.save()
@@ -55,16 +50,15 @@ blogsRouter.put('/:id', async (request, response, next) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response, next) => {
+blogsRouter.delete('/:id', userExtractor, async (request, response, next) => {
   try {
     const blog = await Blog.findById(request.params.id)
 
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
+    const userId = response.userId
 
-    if (decodedToken.id.toString() !== blog.creator._id.toString()) {
+    console.log(userId)
+
+    if (userId !== blog.creator._id.toString()) {
       return response.status(401).json({ error: 'user is not allowed to delete blog' })
     }
 
