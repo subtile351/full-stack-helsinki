@@ -56,8 +56,6 @@ blogsRouter.delete('/:id', userExtractor, async (request, response, next) => {
 
     const userId = response.userId
 
-    console.log(userId)
-
     if (userId !== blog.creator._id.toString()) {
       return response.status(401).json({ error: 'user is not allowed to delete blog' })
     }

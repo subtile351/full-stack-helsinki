@@ -4,7 +4,7 @@ const supertest = require('supertest')
 const assert = require('node:assert')
 const app = require('../app')
 const Blog = require('../models/blog')
-const blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
@@ -28,7 +28,7 @@ const initialBlogs = [
     likes: 3
   },
   {
-    title: 'blog to be deleted',
+    title: 'Some blog title',
     author: 'Me',
     url: 'http://delete.me',
     likes: 0
@@ -64,6 +64,12 @@ const newBlogOnlyLikes = {
   likes: 9999
 }
 
+const testUser = {
+  username: "test",
+  name: "user for tests",
+  password: "TestPassword1234."
+}
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let blogObject = new Blog(initialBlogs[0])
@@ -72,6 +78,10 @@ beforeEach(async () => {
   await blogObject.save()
   blogObject = new Blog(initialBlogs[2])
   await blogObject.save()
+  await User.deleteMany({})
+  await api
+    .post('/api/users')
+    .send(testUser)
 })
 
 describe('when existing blgos are requested', () => {
@@ -98,7 +108,7 @@ describe('when existing blgos are requested', () => {
     const specificBlog = response.body[0]
 
     assert.ok(specificBlog.id, 'specific blog has id property')
-    assert.strictEqual(blog._id, undefined, '_id property does not exist')
+    assert.strictEqual(Blog._id, undefined, '_id property does not exist')
   })
 })
 
@@ -109,9 +119,14 @@ describe('when new blogs are created', () => {
   })
 
   test('new complete blog is created correctly', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: testUser.username, password: testUser.password })
+
     const postResponse = await api
       .post('/api/blogs')
       .send(newCompleteBlog)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -125,9 +140,14 @@ describe('when new blogs are created', () => {
   })
 
   test('new blog without likes is created correctly', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: testUser.username, password: testUser.password })
+
     const response = await api
       .post('/api/blogs')
       .send(newBlogNoLikes)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -135,16 +155,26 @@ describe('when new blogs are created', () => {
   })
 
   test('new blog without title is handled correctly', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: testUser.username, password: testUser.password })
+
     await api
       .post('/api/blogs')
       .send(newBlogNoTitle)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(400)
   })
 
   test('new blog without url is handled correctly', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: testUser.username, password: testUser.password })
+    
     await api
       .post('/api/blogs')
       .send(newBlogNoUrl)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(400)
   })
 })
@@ -176,11 +206,21 @@ describe('when blog is being deleted', () => {
   })
 
   test('deletion of an existing blog is handled correctly', async () => {
-    const blog = await Blog.findOne({ title: /blog to be deleted/i }).lean()
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: testUser.username, password: testUser.password })
+
+    const postResponse = await api
+      .post('/api/blogs')
+      .send(newCompleteBlog)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
+
+    const blog = await Blog.findById(postResponse.body.id).lean()
     const id = blog._id.toString()
 
     await api
       .delete(`/api/blogs/${id}`)
+      .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(204)
   })
 
