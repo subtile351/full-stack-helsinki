@@ -177,6 +177,13 @@ describe('when new blogs are created', () => {
       .set({ Authorization: `Bearer ${loginResponse.body.token}` })
       .expect(400)
   })
+
+  test('new blog without token is not created', async () => {
+    await api
+      .post('/api/blogs')
+      .send(newCompleteBlog)
+      .expect(401)
+  })
 })
 
 describe('when blog is being updated', () => {
