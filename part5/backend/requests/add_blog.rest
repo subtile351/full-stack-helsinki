@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5pa28iLCJpZCI6IjY4OWRjYTI0ZjI3MWQ5MzU0ZDM4MTMyYSIsImlhdCI6MTc1NTQxNzc0Mn0.jj5PUTr6mSEUxrvpje21-uI9otqsUvQlIU2YMiGafGc
+
+{
+  "title": "Niko's blog",
+  "author": "logged in user",
+  "url": "test url",
+  "likes": 1
+}
