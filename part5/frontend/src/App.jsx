@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +12,8 @@ const App = () => {
   const [newBlogTitle, setNewBlogTitle] = useState('')
   const [newBlogAuthor, setNewBlogAuthor] = useState('')
   const [newBlogUrl, setNewBlogUrl] = useState('')
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
@@ -40,10 +43,18 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch {
-      setErrorMessage('wrong credentials')
+      setMessage(`Hello, ${user.name}!`)
+      setMessageType('success')
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
+        setMessageType(null)
+      }, 5000)
+    } catch {
+      setMessage('wrong credentials')
+      setMessageType('error')
+      setTimeout(() => {
+        setMessage(null)
+        setMessageType(null)
       }, 5000)
     }
   }
@@ -64,10 +75,18 @@ const App = () => {
       setNewBlogAuthor('')
       setNewBlogTitle('')
       setNewBlogUrl('')
-    } catch {
-      setErrorMessage('blog could not be created')
+      setMessage('Blog was successfully created')
+      setMessageType('success')
       setTimeout(() => {
-        setErrorMessage(null)
+        setMessage(null)
+        setMessageType(null)
+      }, 5000)
+    } catch {
+      setMessage('blog could not be created')
+      setMessageType('error')
+      setTimeout(() => {
+        setMessage(null)
+        setMessageType(null)
       }, 5000)
     }
   }
@@ -134,6 +153,11 @@ const App = () => {
   return (
     <div>
       <h1>Blogs</h1>
+
+      <Notification
+        message = {message}
+        type = {messageType}
+      />
 
       {!user && loginForm()}
       {user && (
